@@ -12,6 +12,14 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+
+# Load environment variables from .env file FIRST
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 from .db_config import DATABASES
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
