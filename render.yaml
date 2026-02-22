@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: reviewverse
+    env: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: gunicorn peer_review_hub.wsgi:application
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: "3.11.7"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "*.onrender.com"
