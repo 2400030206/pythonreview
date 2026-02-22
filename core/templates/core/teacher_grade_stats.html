@@ -1,0 +1,140 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Grade Statistics - ReviewVerse{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">Class Grade Statistics</h1>
+        <p class="text-gray-600 mb-8">Monitor student performance across all your assignments</p>
+
+        <!-- Assignment Statistics -->
+        {% if assignments %}
+            <div class="space-y-6">
+                {% for assignment in assignments %}
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+                            <h3 class="text-lg font-bold text-gray-900">{{ assignment.title }}</h3>
+                            <p class="text-sm text-gray-600 mt-1">Deadline: {{ assignment.deadline|date:"M d, Y g:i A" }}</p>
+                        </div>
+                        
+                        <div class="px-6 py-6">
+                            {% if class_stats|get_item:assignment.title %}
+                                {% with stats=class_stats|get_item:assignment.title %}
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                        <div class="bg-blue-50 rounded-lg p-4">
+                                            <p class="text-sm text-gray-600 mb-2">Average Grade</p>
+                                            <p class="text-3xl font-bold text-blue-600">{{ stats.avg_grade }}</p>
+                                        </div>
+                                        <div class="bg-green-50 rounded-lg p-4">
+                                            <p class="text-sm text-gray-600 mb-2">Submissions</p>
+                                            <p class="text-3xl font-bold text-green-600">{{ stats.submission_count }}</p>
+                                        </div>
+                                        <div class="bg-purple-50 rounded-lg p-4">
+                                            <p class="text-sm text-gray-600 mb-2">Graded</p>
+                                            <p class="text-3xl font-bold text-purple-600">{{ stats.graded_count }}</p>
+                                        </div>
+                                    </div>
+
+                                    {% if stats.avg_grade >= 80 %}
+                                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                                            <p class="text-sm text-green-800"><strong>Good Performance:</strong> Class average is strong. Keep up the good work!</p>
+                                        </div>
+                                    {% elif stats.avg_grade >= 70 %}
+                                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                            <p class="text-sm text-yellow-800"><strong>Fair Performance:</strong> Consider additional support for struggling students.</p>
+                                        </div>
+                                    {% else %}
+                                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                                            <p class="text-sm text-red-800"><strong>Below Average:</strong> May need intervention and additional support.</p>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                <div class="bg-gray-50 rounded-lg p-6 text-center">
+                                    <p class="text-gray-500">No grades recorded for this assignment yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-white rounded-lg shadow-lg p-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <h3 class="text-xl font-bold text-gray-900 mt-4">No assignments created</h3>
+                <p class="text-gray-600 mt-2">Create an assignment to start tracking student grades.</p>
+                <a href="{% url 'create_assignment' %}" class="inline-block mt-4 bg-brand-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-brand-700 transition-colors">
+                    Create Assignment
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- Overall Class Statistics -->
+        {% if assignments %}
+            <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-6">Overall Class Performance</h3>
+                
+                {% with overall_avg=class_stats|values_avg %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <p class="text-gray-600 text-sm mb-2">Class Average</p>
+                            <p class="text-4xl font-bold text-brand-600">
+                                {% if overall_avg %}
+                                    {{ overall_avg|floatformat:1 }}
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-gray-600 text-sm mb-2">Total Assignments</p>
+                            <p class="text-4xl font-bold text-blue-600">{{ assignments.count }}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-gray-600 text-sm mb-2">Performance Rating</p>
+                            <p class="text-4xl font-bold text-purple-600">
+                                {% if overall_avg >= 80 %}
+                                    Excellent
+                                {% elif overall_avg >= 70 %}
+                                    Good
+                                {% elif overall_avg >= 60 %}
+                                    Fair
+                                {% else %}
+                                    Needs Work
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                {% endwith %}
+            </div>
+        {% endif %}
+
+        <!-- Quick Actions -->
+        <div class="mt-8 flex gap-4 justify-center">
+            <a href="{% url 'create_assignment' %}" class="bg-brand-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-brand-700 transition-colors">
+                Create New Assignment
+            </a>
+            <a href="{% url 'dashboard' %}" class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .get_item {
+        display: none;
+    }
+</style>
+
+<!-- Custom filter for template -->
+<script>
+    // This would normally be a template filter
+    // For now, we'll rely on Django's built-in filters
+</script>
+{% endblock %}

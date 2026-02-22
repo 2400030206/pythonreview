@@ -1,0 +1,128 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Sign Up - Assignment Submission and Peer Review System{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-xl border border-gray-100">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Create your account
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Already have an account?
+                <a href="{% url 'login' %}" class="font-medium text-brand-600 hover:text-brand-500">
+                    Sign in here
+                </a>
+            </p>
+        </div>
+
+        <form class="mt-8 space-y-6" action="" method="POST" novalidate>
+            {% csrf_token %}
+
+            <div class="space-y-4">
+                <!-- Username Field -->
+                <div>
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                    <ul class="mt-1 text-sm text-red-600">
+                        {% for error in form.username.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {% if form.username.help_text %}
+                    <p class="mt-1 text-xs text-gray-500">{{ form.username.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Email Field -->
+                <div>
+                    {{ form.email.label_tag }}
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <ul class="mt-1 text-sm text-red-600">
+                        {% for error in form.email.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    {{ form.password1.label_tag }}
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                    <ul class="mt-1 text-sm text-red-600">
+                        {% for error in form.password1.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {% if form.password1.help_text %}
+                    <p class="mt-1 text-xs text-gray-500">{{ form.password1.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Password Confirmation Field -->
+                <div>
+                    {{ form.password2.label_tag }}
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                    <ul class="mt-1 text-sm text-red-600">
+                        {% for error in form.password2.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+
+                <!-- Role Selection Field -->
+                <div class="pt-2 pb-1 border-t border-gray-200 mt-4">
+                    <label class="block text-sm font-bold text-gray-900 mb-3">I am signing up as a:</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        {% for radio in form.role %}
+                        <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none 
+                            {% if form.role.errors %}border-red-300{% else %}border-gray-300{% endif %} hover:bg-gray-50 items-center justify-center">
+                            <span class="flex items-center">
+                                {{ radio.tag }}
+                                <span class="ml-2 font-medium text-gray-900">{{ radio.choice_label }}</span>
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% if form.role.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.role.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <button type="submit"
+                    class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors duration-200 shadow-md">
+                    Sign up
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Add styled radio buttons effect */
+    input[type="radio"]:checked+span {
+        font-weight: bold;
+    }
+
+    input[type="radio"]:checked {
+        accent-color: var(--brand-600, #2563eb);
+    }
+
+    label:has(input[type="radio"]:checked) {
+        border-color: var(--brand-600, #2563eb);
+        background-color: var(--brand-50, #eff6ff);
+        ring: 2px solid var(--brand-600, #2563eb);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,243 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Student Dashboard - Assignment Submission and Peer Review System{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900">Student Dashboard</h1>
+        <p class="text-gray-500 mt-1">Submit your assignments and review your peers' work</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 gap-8">
+
+    <!-- Row 1: Actionable Items (Pending & Reviews) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Pending Assignments -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-100 flex flex-col h-full">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200 bg-orange-50 flex items-center">
+                <svg class="w-6 h-6 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-lg leading-6 font-bold text-orange-900">Pending Assignments</h3>
+            </div>
+            <div class="flex-grow">
+                {% if pending_assignments %}
+                <ul class="divide-y divide-gray-200">
+                    {% for assignment in pending_assignments %}
+                    <li class="hover:bg-orange-50/50 transition-colors">
+                        <div class="px-4 py-4 sm:px-6">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-md font-semibold text-brand-700 truncate">{{ assignment.title }}</h4>
+                                <div class="ml-2 flex-shrink-0 flex">
+                                    <p
+                                        class="px-2 inline-flex text-xs leading-5 font-bold rounded-full bg-red-100 text-red-800 border border-red-200">
+                                        Due: {{ assignment.deadline|timeuntil }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-sm text-gray-600 line-clamp-2">
+                                {{ assignment.description }}
+                            </div>
+                            <div class="mt-4 flex flex-row-reverse">
+                                <a href="{% url 'submit_assignment' assignment.id %}"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-bold rounded shadow-sm text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors">
+                                    Submit Work
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="p-8 flex flex-col items-center justify-center text-center h-full">
+                    <div class="rounded-full bg-green-100 p-3 mb-4">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 font-medium h-[100px]">Hooray! No pending assignments.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Peer Reviews -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-100 flex flex-col h-full">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200 bg-brand-50 flex items-center">
+                <svg class="w-6 h-6 text-brand-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                    </path>
+                </svg>
+                <div class="flex-grow">
+                    <h3 class="text-lg leading-6 font-bold text-brand-900">Perform Peer Reviews</h3>
+                    <p class="mt-0.5 text-xs text-brand-700">Help your classmates by providing constructive feedback.
+                    </p>
+                </div>
+            </div>
+            <div class="flex-grow">
+                {% if submissions_to_review %}
+                <ul class="divide-y divide-gray-200">
+                    {% for submission in submissions_to_review %}
+                    <li class="hover:bg-gray-50 transition-colors p-4 sm:px-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-sm font-semibold text-gray-900">Submission for: {{ submission.assignment.title }}</h4>
+                            <span class="text-xs text-brand-600 font-medium bg-brand-50 px-2 py-1 rounded">Anonymous Peer</span>
+                        </div>
+                        <div
+                            class="bg-gray-50 p-3 rounded mb-4 text-xs text-gray-600 font-mono overflow-auto max-h-24 border border-gray-200">
+                            {{ submission.content|truncatechars:150|default:"File upload only." }}
+                        </div>
+                        <a href="{% url 'review_submission' submission.id %}"
+                            class="inline-flex w-full justify-center items-center px-4 py-2 border border-brand-300 shadow-sm text-sm font-bold rounded-md text-brand-700 bg-white hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors">
+                            Review This Submission &rarr;
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="p-8 flex flex-col items-center justify-center text-center h-full">
+                    <svg class="mx-auto h-12 w-12 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.514">
+                        </path>
+                    </svg>
+                    <p class="text-sm text-gray-500 font-medium h-[100px]">No submissions available for review right
+                        now. Check back later!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Completed Assignments -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-100 mt-2">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200 bg-green-50 flex items-center">
+            <svg class="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="text-lg leading-6 font-bold text-green-900">Completed Assignments & Feedback</h3>
+        </div>
+
+        {% if my_submissions %}
+        <ul class="divide-y divide-gray-200">
+            {% for submission in my_submissions %}
+            <li class="px-4 py-6 sm:px-6 hover:bg-gray-50">
+                <!-- Header: Assignment Name & Status -->
+                <div
+                    class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-gray-100 pb-4">
+                    <div class="mb-2 sm:mb-0">
+                        <h4 class="text-lg font-bold text-gray-900 flex items-center">
+                            {{ submission.assignment.title }}
+                            <svg class="w-4 h-4 ml-2 text-green-500" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </h4>
+                        <p class="text-xs text-gray-500 mt-1">Submitted on {{ submission.submitted_at|date:"M d, Y" }}
+                        </p>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        {% if submission.file %}
+                        <a href="{{ submission.file.url }}" target="_blank"
+                            class="text-sm font-medium text-brand-600 hover:text-brand-500 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded transition-colors flex items-center border border-brand-200">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
+                                </path>
+                            </svg>
+                            View Upload
+                        </a>
+                        {% endif %}
+
+                        {% if submission.teacher_grade %}
+                        <span
+                            class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-black bg-blue-100 text-blue-800 border-2 border-blue-200 shadow-sm">
+                            Official Grade: {{ submission.teacher_grade }}/100
+                        </span>
+                        {% else %}
+                        <span
+                            class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                            Awaiting Grade
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Feedback Section Grid -->
+                <div
+                    class="grid grid-cols-1 {% if submission.peer_reviews.count > 0 and submission.teacher_remarks %}md:grid-cols-2 gap-4{% else %}md:grid-cols-1{% endif %}">
+
+                    <!-- Teacher Remarks (Takes full width if no peer reviews) -->
+                    {% if submission.teacher_remarks %}
+                    <div class="bg-blue-50/50 rounded-lg p-4 border border-blue-100 shadow-sm">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
+                                </path>
+                            </svg>
+                            <span class="text-sm font-bold text-blue-900 uppercase tracking-wide">Teacher Remarks</span>
+                        </div>
+                        <p class="text-sm text-gray-800 leading-relaxed">"{{ submission.teacher_remarks }}"</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Peer Reviews -->
+                    <div class="{% if submission.teacher_remarks %}border-l border-gray-200 pl-4{% endif %}">
+                        <div class="flex items-center mb-3">
+                            <span class="text-sm font-bold text-gray-700 uppercase tracking-wide">Peer Feedback ({{
+                                submission.peer_reviews.count }})</span>
+                        </div>
+
+                        {% if submission.peer_reviews.count > 0 %}
+                        <div class="space-y-3">
+                            {% for review in submission.peer_reviews.all %}
+                            <div class="bg-white rounded p-3 border border-gray-200 shadow-sm">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-medium text-gray-500">Anonymous Peer</span>
+                                    <span
+                                        class="px-2 py-0.5 inline-flex text-xs leading-5 font-bold rounded bg-gray-100 text-gray-800 border border-gray-200">
+                                        Score: {{ review.grade }}/100
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-700 italic">"{{ review.feedback }}"</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-sm text-gray-400 italic bg-gray-50 p-3 rounded border border-gray-100">No peer
+                            reviews received yet.</p>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+            </svg>
+            <p class="text-gray-500 font-medium">You haven't completed any assignments yet.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

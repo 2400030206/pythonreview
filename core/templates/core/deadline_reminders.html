@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+
+{% block title %}Deadline Reminders - ReviewVerse{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold text-gray-900 mb-8">Deadline Reminders</h1>
+
+        {% if reminders %}
+            <div class="space-y-4">
+                {% for reminder in reminders %}
+                    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-orange-500">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-gray-900">{{ reminder.assignment.title }}</h3>
+                                <p class="text-gray-600 text-sm mt-1">Deadline: {{ reminder.assignment.deadline|date:"M d, Y g:i A" }}</p>
+                                <p class="text-gray-600 text-sm mt-1">Reminder: {{ reminder.get_reminder_type_display }}</p>
+                            </div>
+                            <span class="inline-block px-3 py-1 {% if reminder.is_acknowledged %}bg-green-100 text-green-800{% else %}bg-orange-100 text-orange-800{% endif %} text-sm font-semibold rounded-full">
+                                {% if reminder.is_acknowledged %}Acknowledged{% else %}Pending{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-white rounded-lg shadow-lg p-12 text-center">
+                <p class="text-gray-600 text-lg mb-4">No upcoming deadline reminders.</p>
+                <p class="text-gray-500">You're all set!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

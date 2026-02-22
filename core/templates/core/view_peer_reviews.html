@@ -1,0 +1,118 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Peer Reviews - Assignment Submission and Peer Review System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div>
+            <a href="{% url 'view_submissions' submission.assignment.id %}"
+                class="text-brand-600 hover:text-brand-800 flex items-center text-sm font-medium transition-colors mb-2">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to All Submissions
+            </a>
+            <h1 class="text-3xl font-bold text-gray-900">Reviews for: {{ submission.student.username }}</h1>
+            <p class="text-gray-500 mt-1">Assignment: {{ submission.assignment.title }}</p>
+        </div>
+    </div>
+
+    <!-- Teacher's Official Grade -->
+    {% if submission.teacher_grade %}
+    <div class="bg-brand-50 shadow sm:rounded-lg border border-brand-200 mb-8 mt-4 overflow-hidden">
+        <div class="px-4 py-3 border-b border-brand-200 bg-white flex justify-between items-center">
+            <h3 class="text-md font-bold text-brand-800 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Official Teacher Evaluation
+            </h3>
+            <span
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-brand-100 text-brand-800 border border-brand-300">
+                Grade: {{ submission.teacher_grade }} / 100
+            </span>
+        </div>
+        {% if submission.teacher_remarks %}
+        <div class="p-4 sm:p-6 text-sm text-gray-800 bg-white">
+            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Teacher Remarks</h4>
+            <div class="whitespace-pre-wrap leading-relaxed">{{ submission.teacher_remarks }}</div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Student's Original Submission -->
+    <div class="bg-gray-50 shadow sm:rounded-lg border border-gray-200 mb-8 mt-4 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 bg-white">
+            <h3 class="text-md font-semibold text-gray-700">Original Submission Content</h3>
+        </div>
+        {% if submission.file %}
+        <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+            <a href="{{ submission.file.url }}" target="_blank"
+                class="inline-flex items-center text-sm font-medium text-brand-600 hover:text-brand-800 bg-white hover:bg-gray-50 rounded-md px-3 py-1.5 border border-gray-300">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
+                    </path>
+                </svg>
+                View Attached File
+            </a>
+        </div>
+        {% endif %}
+        <div class="p-4 sm:p-6 text-sm text-gray-800 font-mono whitespace-pre-wrap leading-relaxed overflow-x-auto">
+            {{ submission.content|default:"No text response provided." }}
+        </div>
+        <div class="bg-gray-100 px-4 py-3 text-right sm:px-6">
+            <span class="text-xs text-gray-500">Submitted at: {{ submission.submitted_at|date:"M d, Y h:i A" }}</span>
+        </div>
+    </div>
+
+    <!-- The Reviews -->
+    <h3 class="text-xl font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">Peer Feedback</h3>
+
+    {% if reviews %}
+    <div class="space-y-6">
+        {% for review in reviews %}
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-100 relative">
+            <!-- Grade Badge -->
+            <div
+                class="absolute top-4 right-4 bg-brand-100 text-brand-800 font-bold px-3 py-1 rounded-full border border-brand-200 shadow-sm text-lg">
+                {{ review.grade }} / 100
+            </div>
+
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200 bg-gray-50">
+                <div class="flex items-center mt-1">
+                    <div
+                        class="flex-shrink-0 h-6 w-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-xs">
+                        R
+                    </div>
+                    <div class="ml-2">
+                        <span class="text-sm font-medium text-gray-900">Reviewer: {{ review.reviewer.username }}</span>
+                    </div>
+                    <span class="ml-4 text-xs text-gray-500">{{ review.created_at|date:"M d, Y h:i A" }}</span>
+                </div>
+            </div>
+
+            <div class="px-4 py-5 sm:p-6">
+                <h4 class="text-sm font-medium text-gray-500 uppercase mb-2">Feedback Summary</h4>
+                <div class="text-gray-800 text-sm whitespace-pre-wrap italic pl-4 border-l-4 border-brand-300">"{{
+                    review.feedback }}"</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-100 p-8 text-center text-gray-500">
+        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+            </path>
+        </svg>
+        <p>No peer reviews have been submitted for this work yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

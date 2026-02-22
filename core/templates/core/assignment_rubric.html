@@ -1,0 +1,56 @@
+{% extends "core/base.html" %}
+
+{% block title %}{% if rubric %}{{ assignment.title }} Rubric{% else %}Create Rubric{% endif %} - ReviewVerse{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ assignment.title }} - Grading Rubric</h1>
+        
+        {% if rubric %}
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ rubric.title }}</h2>
+                <p class="text-gray-700 mb-6">{{ rubric.description }}</p>
+                
+                <div class="mb-6">
+                    <p class="text-sm text-gray-600 mb-2">Total Points: <span class="font-bold">{{ rubric.total_points }}</span></p>
+                </div>
+
+                {% if rubric.criteria.all %}
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-bold text-gray-900">Grading Criteria</h3>
+                        {% for criterion in rubric.criteria.all %}
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold text-gray-900">{{ criterion.name }}</h4>
+                                    <span class="px-3 py-1 bg-brand-100 text-brand-800 text-sm font-bold rounded-full">
+                                        {{ criterion.points }} pts
+                                    </span>
+                                </div>
+                                <p class="text-gray-700">{{ criterion.description }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-yellow-800">
+                        <p>No criteria defined yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <p class="text-gray-600 mb-4">No rubric has been created for this assignment yet.</p>
+                {% if user.is_teacher and user == assignment.created_by %}
+                    <a href="{% url 'create_rubric' assignment.id %}" class="inline-block bg-brand-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-brand-700 transition-colors">
+                        Create Rubric
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="mt-8">
+            <a href="{% url 'dashboard' %}" class="text-brand-600 hover:text-brand-700 font-semibold">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

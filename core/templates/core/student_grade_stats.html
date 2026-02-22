@@ -1,0 +1,128 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Grade Statistics - ReviewVerse{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">Grade Statistics</h1>
+        <p class="text-gray-600 mb-8">Analyze your academic performance across all assignments</p>
+
+        <!-- Key Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm font-medium">Average Grade</p>
+                <p class="text-3xl font-bold text-green-600 mt-2">{{ stats.avg_grade|floatformat:1|default:"--" }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm font-medium">Total Graded</p>
+                <p class="text-3xl font-bold text-blue-600 mt-2">{{ stats.total_graded }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm font-medium">Best Grade</p>
+                <p class="text-3xl font-bold text-purple-600 mt-2">
+                    {% with best=submissions|dictsort:"teacher_grade"|last %}
+                        {{ best.teacher_grade|default:"--" }}
+                    {% endwith %}
+                </p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm font-medium">Performance</p>
+                <p class="text-3xl font-bold text-orange-600 mt-2">
+                    {% if stats.avg_grade >= 90 %}
+                        A+ Excellent
+                    {% elif stats.avg_grade >= 80 %}
+                        A Good
+                    {% elif stats.avg_grade >= 70 %}
+                        B Satisfactory
+                    {% elif stats.avg_grade >= 60 %}
+                        C Fair
+                    {% else %}
+                        D Needs Work
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Detailed Submissions Table -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+                <h3 class="text-lg font-bold text-gray-900">Submission Grades</h3>
+            </div>
+            
+            {% if submissions %}
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Assignment</th>
+                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Submitted</th>
+                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Grade</th>
+                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Remarks</th>
+                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Peer Reviews</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for submission in submissions %}
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ submission.assignment.title }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">{{ submission.submitted_at|date:"M d, Y" }}</td>
+                                    <td class="px-6 py-4 text-sm font-semibold">
+                                        <span class="inline-block px-3 py-1 rounded-full {% if submission.teacher_grade >= 80 %}bg-green-100 text-green-800{% elif submission.teacher_grade >= 60 %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                            {{ submission.teacher_grade }}/100
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                        {% if submission.teacher_remarks %}
+                                            <div class="max-w-xs truncate" title="{{ submission.teacher_remarks }}">
+                                                {{ submission.teacher_remarks }}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                                            {{ submission.peer_reviews.count }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="px-6 py-8 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-gray-500 mt-2">No graded submissions yet.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Grade Distribution Chart -->
+        <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Grade Distribution</h3>
+            <div class="h-64 flex items-end justify-around gap-4 px-4 py-8 bg-gray-50 rounded-lg">
+                {% for grade in submissions %}
+                    <div class="flex flex-col items-center">
+                        <div class="h-32 bg-brand-400 rounded-t-lg w-8"></div>
+                        <p class="text-xs text-gray-600 mt-2">{{ grade.teacher_grade }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 text-center w-full">No grade data to display</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 text-center">
+            <a href="{% url 'student_progress' %}" class="inline-block bg-brand-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-brand-700 transition-colors">
+                Back to Progress Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Peer Review - Assignment Submission and Peer Review System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6 flex items-center">
+        <a href="{% url 'dashboard' %}"
+            class="text-brand-600 hover:text-brand-800 flex items-center text-sm font-medium transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+            </svg>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-xl border border-gray-100 flex flex-col">
+        <!-- Peer's Submission -->
+        <div class="bg-gray-50 border-b border-gray-200 p-6 sm:px-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Reviewing: {{ submission.assignment.title }}</h3>
+                <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                    Anonymous Peer
+                </span>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Submission Content</h4>
+                {% if submission.file %}
+                <div class="mb-3">
+                    <a href="{{ submission.file.url }}" target="_blank"
+                        class="inline-flex items-center text-sm font-medium text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 rounded-md px-3 py-2 transition-colors border border-brand-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
+                            </path>
+                        </svg>
+                        Download Attached File
+                    </a>
+                </div>
+                {% endif %}
+                <div
+                    class="bg-white p-4 rounded-md border border-gray-200 shadow-inner font-mono text-sm leading-relaxed overflow-auto max-h-96 whitespace-pre-wrap">
+                    {{ submission.content|default:"No text response provided." }}</div>
+            </div>
+        </div>
+
+        <!-- Feedback Form -->
+        <div class="p-6 sm:p-8">
+            <h4 class="text-lg leading-6 font-semibold text-gray-900 mb-4 border-b pb-2">Provide Feedback</h4>
+
+            {% if form.non_field_errors %}
+            <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                {% for error in form.non_field_errors %}
+                <p class="text-sm text-red-700">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form action="" method="POST" class="space-y-6">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="md:col-span-3">
+                        <div>
+                            <label for="{{ form.feedback.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ form.feedback.label }}</label>
+                            <p class="text-xs text-gray-500 mb-2">Explain what they did well and areas for improvement.</p>
+                            {{ form.feedback }}
+                            {% if form.feedback.errors %}
+                            <div class="mt-2 text-sm text-red-600">
+                                {% for error in form.feedback.errors %}
+                                <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-1 border-l pl-6">
+                        <div>
+                            <label for="{{ form.grade.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-1">{{ form.grade.label }}</label>
+                            <p class="text-xs text-gray-500 mb-2 text-center">(1-100)</p>
+                            <div class="flex items-center justify-center h-full pb-8">
+                                {{ form.grade }}
+                            </div>
+                            {% if form.grade.errors %}
+                            <div class="mt-2 text-sm text-red-600">
+                                {% for error in form.grade.errors %}
+                                <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4 border-t border-gray-200 mt-6">
+                    <button type="submit"
+                        class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors">
+                        Submit Review
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
